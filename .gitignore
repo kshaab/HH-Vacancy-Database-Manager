@@ -189,4 +189,4 @@ cython_debug/
 .cursorindexingignore
 user_settings.json
 .DS_Store
-.database.ini
+database.ini
