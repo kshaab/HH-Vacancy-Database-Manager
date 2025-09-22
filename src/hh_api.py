@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, cast
 import requests
 from src.base_class_hh_api import BaseClassAPI
+import json
 
 
 class HeadHunterAPI(BaseClassAPI):
@@ -14,7 +15,7 @@ class HeadHunterAPI(BaseClassAPI):
         """Метод подключения к API"""
         try:
             response = requests.get(
-                f"{self.__base_url}{endpoint}", #endpoint для получения и компаний, и вакансий
+                f"{self.__base_url}{endpoint}",
                 params=params,
                 headers={"User-Agent": "HH-User-Agent"},
                 timeout=10,
@@ -35,9 +36,10 @@ class HeadHunterAPI(BaseClassAPI):
 
             if isinstance(data, dict):
                 items = data.get("items", [])
-                results.extend(cast(List[Dict[str, Any]], items))
-            elif isinstance(data, list):
-                results.extend(data)
+                for item in items:
+                    if item.get("name") == name:
+                        results.append(item)
+                        break
 
         return results
 
@@ -48,14 +50,29 @@ class HeadHunterAPI(BaseClassAPI):
         return cast(List[Dict[str, Any]], data.get("items", []))
 
 
-# if __name__ == "__main__":
-#     api = HeadHunterAPI()
-#
-#     companies = api.get_company("Skyeng")
-#     for company in companies:
-#         print(f"Работодатель: {company['name']} (id={company['id']})")
-#
-#         vacancies = api.get_vacancies(company["id"])
-#         for v in vacancies[:5]:
-#             print(f"  - {v['name']} ({v['area']['name']})")
+if __name__ == "__main__":
+    api = HeadHunterAPI()
+
+    companies = [
+        "VK", "Газпром недра",
+        "Skyeng", "Лаборатория Касперского",
+        "Four Seasons Hotel Moscow", "СБЕР",
+        "Яндекс", "Солар",
+        "ЛУКОЙЛ", "STARS COFFEE"
+    ]
+
+    json_data_emp = api.get_companies(companies)
+    # all_vacancies = {}
+    # for company in json_data_emp:
+    #     employer_id = company['id']
+    #     vacancies = api.get_vacancies(employer_id)
+    #     all_vacancies[employer_id] = vacancies
+
+    print("Компании:")
+    print(json.dumps(json_data_emp, ensure_ascii=False, indent=4))
+
+
+    # print("\nВакансии:")
+    # print(json.dumps(all_vacancies, ensure_ascii=False, indent=4))
+
 
