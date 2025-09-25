@@ -1,7 +1,9 @@
-from typing import Any, Dict, List, cast
-import requests
-from src.base_hh_api import BaseClassAPI
 import json
+from typing import Any, Dict, List, cast
+
+import requests
+
+from src.base_hh_api import BaseClassAPI
 
 
 class HeadHunterAPI(BaseClassAPI):

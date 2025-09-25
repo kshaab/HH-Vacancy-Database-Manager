@@ -1,9 +1,9 @@
-from configparser import ConfigParser
 import os
+from configparser import ConfigParser
 from typing import Any
 
 
-def config(filename: str ="database.ini", section: str ="postgresql") -> dict[str, Any]:
+def config(filename: str = "database.ini", section: str = "postgresql") -> dict[str, Any]:
     """Чтение параметров для подключения"""
     parser = ConfigParser()
     file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), filename)
