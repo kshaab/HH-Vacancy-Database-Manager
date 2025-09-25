@@ -10,7 +10,8 @@ class BaseClassAPI(ABC):
         """Метод подключения к API"""
         ...
 
-    def get_company(self, company_name: str) -> List[Dict[str, Any]]:
+    @abstractmethod
+    def get_companies(self, company_name: str) -> List[Dict[str, Any]]:
         """Метод получения компаний"""
         ...
 

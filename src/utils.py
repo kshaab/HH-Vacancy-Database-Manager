@@ -2,9 +2,10 @@ import psycopg2
 from typing import Any
 from src.hh_api import HeadHunterAPI
 
+
 def create_database(database_name: str, params: dict) -> None:
     """Создание базы данных и таблиц для сохранения данных об организациях и вакансиях"""
-    conn = psycopg2.connect(dbname='postgres', **params)
+    conn = psycopg2.connect(dbname="postgres", **params)
     conn.autocommit = True
     cur = conn.cursor()
 
@@ -16,17 +17,19 @@ def create_database(database_name: str, params: dict) -> None:
     conn = psycopg2.connect(dbname=database_name, **params)
 
     with conn.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
         CREATE TABLE employers (
             employer_id VARCHAR(20) PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
-            number_of_vacancy INTEGER,
             url VARCHAR(255)
             )
-        """)
+        """
+        )
 
     with conn.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
         CREATE TABLE vacancies (
             vacancy_id VARCHAR(20) PRIMARY KEY,
             employer_id VARCHAR(20) REFERENCES employers(employer_id),
@@ -37,7 +40,8 @@ def create_database(database_name: str, params: dict) -> None:
             currency VARCHAR(20),
             url VARCHAR(255)
             )
-        """)
+        """
+        )
 
     conn.commit()
     conn.close()
@@ -49,40 +53,39 @@ def save_data_to_database(employers: list[dict[str, Any]], database_name: str, p
 
     with conn.cursor() as cur:
         for employer in employers:
-            cur.execute("""
-                INSERT INTO employers (employer_id, name, number_of_vacancy, url)
-                VALUES (%s, %s, %s, %s)
+            cur.execute(
+                """
+                INSERT INTO employers (employer_id, name, url)
+                VALUES (%s, %s, %s)
                 ON CONFLICT (employer_id) DO NOTHING
                 """,
-                (
-                    employer['id'],
-                    employer['name'],
-                    employer['open_vacancies'],
-                    employer['alternate_url']
-                  )
+                (employer["id"], employer["name"], employer["alternate_url"]),
             )
 
             api = HeadHunterAPI()
-            vacancies_data = api.get_vacancies(employer['id'])
+            vacancies_data = api.get_vacancies(employer["id"])
             for vacancy in vacancies_data:
-                salary = vacancy.get('salary') or {}
-                cur.execute("""
+                salary = vacancy.get("salary") or {}
+                cur.execute(
+                    """
                     INSERT INTO vacancies (
                         vacancy_id, employer_id, title, description,
                         salary_from, salary_to, currency, url
                     )
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (vacancy_id) DO NOTHING
-                """, (
-                    vacancy['id'],
-                    employer['id'],
-                    vacancy.get('name', ''),
-                    vacancy.get('snippet', {}).get('requirement', ''),
-                    salary.get('from'),
-                    salary.get('to'),
-                    salary.get('currency'),
-                    vacancy.get('alternate_url', '')
-                ))
+                """,
+                    (
+                        vacancy["id"],
+                        employer["id"],
+                        vacancy.get("name", ""),
+                        vacancy.get("snippet", {}).get("requirement", ""),
+                        salary.get("from"),
+                        salary.get("to"),
+                        salary.get("currency"),
+                        vacancy.get("alternate_url", ""),
+                    ),
+                )
 
     conn.commit()
     conn.close()

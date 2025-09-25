@@ -13,6 +13,3 @@ def config(filename="database.ini", section="postgresql") -> dict[str, Any]:
         return {param[0]: param[1] for param in parser.items(section)}
 
     raise Exception(f"Section {section} not found in {filename}")
-
-
-

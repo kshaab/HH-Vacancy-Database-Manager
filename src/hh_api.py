@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, cast
 import requests
-from src.base_class_hh_api import BaseClassAPI
+from src.base_hh_api import BaseClassAPI
 import json
 
 
@@ -54,11 +54,16 @@ if __name__ == "__main__":
     api = HeadHunterAPI()
 
     companies = [
-        "VK", "Газпром недра",
-        "Skyeng", "Лаборатория Касперского",
-        "Four Seasons Hotel Moscow", "СБЕР",
-        "Яндекс", "Солар",
-        "ЛУКОЙЛ", "STARS COFFEE"
+        "VK",
+        "Газпром недра",
+        "Skyeng",
+        "Лаборатория Касперского",
+        "Four Seasons Hotel Moscow",
+        "СБЕР",
+        "Яндекс",
+        "Солар",
+        "ЛУКОЙЛ",
+        "STARS COFFEE",
     ]
 
     json_data_emp = api.get_companies(companies)
@@ -71,8 +76,5 @@ if __name__ == "__main__":
     print("Компании:")
     print(json.dumps(json_data_emp, ensure_ascii=False, indent=4))
 
-
     # print("\nВакансии:")
     # print(json.dumps(all_vacancies, ensure_ascii=False, indent=4))
-
-
