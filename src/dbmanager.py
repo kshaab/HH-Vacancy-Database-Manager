@@ -1,5 +1,6 @@
 from src.base_dbmanager import BaseDBManager
 import psycopg2
+from typing import Any, List, Tuple, Optional, cast
 
 
 class DBManager(BaseDBManager):
@@ -9,11 +10,11 @@ class DBManager(BaseDBManager):
         """Инициализация подключение к БД"""
         self.conn = psycopg2.connect(**params)
 
-    def close(self):
+    def close(self) -> None:
         """Закрыть соединение с БД"""
         self.conn.close()
 
-    def get_companies_and_vacancies_count(self):
+    def get_companies_and_vacancies_count(self) -> List[Tuple[str, int]]:
         """Получает список всех компаний и количество вакансий у каждой компании"""
         with self.conn.cursor() as cur:
             cur.execute("""
@@ -23,9 +24,9 @@ class DBManager(BaseDBManager):
                 GROUP BY employers.employer_id, employers.name
                 ORDER BY number_of_vacancies DESC
             """)
-            return cur.fetchall()
+            return cast(List[Tuple[str, int]], cur.fetchall())
 
-    def get_all_vacancies(self):
+    def get_all_vacancies(self) ->  List[Tuple[Any, ...]]:
         """Получает список всех вакансий с названием компании, вакансией, зарплатой и ссылкой"""
         with self.conn.cursor() as cur:
             cur.execute(""" 
@@ -40,9 +41,9 @@ class DBManager(BaseDBManager):
                 INNER JOIN employers ON vacancies.employer_id = employers.employer_id
                 ORDER BY company_name, vacancy_title 
             """)
-            return cur.fetchall()
+            return cast(List[Tuple[Any, ...]], cur.fetchall())
 
-    def get_avg_salary(self):
+    def get_avg_salary(self) -> float:
         """Получает среднюю зарплату по всем вакансиям"""
         with self.conn.cursor() as cur:
             cur.execute(""" 
@@ -51,9 +52,10 @@ class DBManager(BaseDBManager):
                 FROM vacancies
                 WHERE salary_from IS NOT NULL OR salary_to IS NOT NULL
             """)
-            return cur.fetchone()[0]  # возвращаем одно число
+            result = cur.fetchone()[0]
+            return float(result[0]) if result and result[0] is not None else 0.0
 
-    def get_vacancies_with_higher_salary(self):
+    def get_vacancies_with_higher_salary(self) -> List[Tuple[Any, ...]]:
         """Получает список вакансий, у которых зарплата выше средней"""
         average_salary = self.get_avg_salary()
         with self.conn.cursor() as cur:
@@ -72,9 +74,9 @@ class DBManager(BaseDBManager):
                 ORDER BY ((COALESCE(vacancies.salary_from, vacancies.salary_to) + 
                            COALESCE(vacancies.salary_to, vacancies.salary_from)) / 2) DESC
             """, (average_salary,))
-            return cur.fetchall()
+            return cast(List[Tuple[Any, ...]], cur.fetchall())
 
-    def get_vacancies_with_keyword(self, keyword: str):
+    def get_vacancies_with_keyword(self, keyword: str) -> List[Tuple[Any, ...]]:
         """Получает список вакансий, в названии которых содержится переданное слово"""
         with self.conn.cursor() as cur:
             cur.execute("""
@@ -90,5 +92,5 @@ class DBManager(BaseDBManager):
                 WHERE LOWER(vacancies.title) LIKE LOWER(%s)
                 ORDER BY company_name, vacancy_title
             """, (f'%{keyword}%',))
-            return cur.fetchall()
+            return cast(List[Tuple[Any, ...]], cur.fetchall())
 

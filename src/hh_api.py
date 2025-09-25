@@ -8,7 +8,7 @@ class HeadHunterAPI(BaseClassAPI):
     """Класс для работы с API hh.ru"""
 
     def __init__(self) -> None:
-        "Инициализация приватного атрибута класса"
+        """Инициализация приватного атрибута класса"""
         self.__base_url = "https://api.hh.ru"
 
     def _connect_api(self, endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -21,7 +21,10 @@ class HeadHunterAPI(BaseClassAPI):
                 timeout=10,
             )
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            if isinstance(data, dict):
+                return data
+            return {}
         except requests.RequestException as e:
             print(f"Ошибка при подключении к API: {e}")
             return {}
